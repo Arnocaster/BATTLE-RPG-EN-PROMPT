@@ -2,56 +2,14 @@
 var player1 = []
 var player2 = []
 var nameList = ["Dirsogrë", "Themelë", "Tadtel", "Rochmith", "Aërhûn", "Shebhir", "Aëthim", "Nanlenlon", "Rauaër", "Erhar", "Ilrod", "Iennan", "Harnag", "Vîngarrim", "Minbel", "Caldilrë", "Sîrum", "Luingad", "Loeodh", "Berdulië", "Gurdae", "Athbret", "Lamdundîr", "Athien", "Cuilim", "Tadum", "Ionoth", "Iaodh", "Galunië", "Cuifal", "Sadruïn", "Taethûdîr", "Lammîl", "Ergroron", "Sogbeth", "Mithrena", "ûrloerë", "Firrhaa", "Lhoelrim", "Iashelnir", "Ganpel", "Etheälië", "Thirdin", "Idhber", "Bretcau", "Amvîn", "Garleb", "Danduinil", "Mirmal", "Sënrau", "Lanrhyn", "Melduir", "Himduilë", "Calath", "Dothliathaë", "Theglam", "Moelaënir", "Bethvel", "Oeggae", "Belrha", "Mîlrhyn", "Ruïnteith", "Nîntuma", "Lathdul", "Gweeg", "Saeûr", "Cyrmeldîr", "Henmel", "Cenmae", "Lathdellon", "Nordan", "Faubar", "Geldothrë", "Fincau", "Lebna"]
-var playerTurn = Math.round(Math.random()+1)
+var playerTurn = Math.round(Math.random()+1);
+var defender;
+var attacker;
 function welcome(){
   alert("Bienvenue dans ce petit jeux, vous allez devoir vous battre contre l'ordinateur\n");
 }
 
-
-function initPlayer(playerNumber){
-  //Loterie du loot, initialisation des armes/armures aléatoires
-  var playerClass = Math.round((Math.random()*2)+1);
-  if (playerClass === 1){
-    var weapon = "EPEE";
-    var dmg = 15;
-    var armor = "ACIER";
-    var pv = 250;
-  } else if (playerClass === 2){
-    var weapon = "LANCE";
-    var dmg = 20;
-    var armor = "CUIR";
-    var pv = 200;
-  } else if (playerClass === 3){
-    var weapon = "BAGUETTE DE FEU";
-    var dmg = 25;
-    var armor = "TISSU";
-    var pv = 175;
-  } else {
-    console.log("T'as fait de la merde avec initPlayer" + playerClass);
-  }
-
-  //Si on initialise le joureur 1 (Humain)
-  if (playerNumber === 1) {
-    var name = "Arnaud"// IMPORTANT DE OUF !!!!!!!!!!!!!!!!!!!!A remettre en fin de dev prompt("Quel est le nom du joueur?");
-    //Tant que le nom est vide on redemande au joueur
-    while(name === "") {
-    name = prompt("Choisissez votre nom :");
-    }
-    player1.push(name,weapon,armor,dmg,pv);
-  }
-  //Si on initialise le joueur 2 (CPU)
-  else if (playerNumber === 2){
-    var name = nameList[Math.round(Math.random()*(nameList.length-1))];
-    player2.push(name,weapon,armor,dmg,pv);
-  }
-  
-  if (player1.length>4 && player2.length>4){
-    console.log(player1);
-    console.log(player2);
-    console.log(player1[0] + " votre " + player1[1] + " et votre armure de " + player2[2] + " vous on été attribués pour ce combat.");
-  }
-}
-
+//------ FONCTIONS UTILITAIRES ------
 //Fonction qui  récupère les données dans les tableaux 
 //en fonction d'un string(name,weapon,armor,dmg,pv) et du numéro de joueur (1,2).
 function returnData(data, player){
@@ -63,21 +21,170 @@ function returnData(data, player){
 
   if (data === "name"){
     return player[0];
-  } else if (data === "weapon"){
+  } else if (data === "pv"){
     return player[1];
-  } else if (data === "armor"){
+  } else if (data === "weapon"){
     return player[2];
   } else if (data === "dmg"){
     return player[3];
-  } else if (data === "pv"){
+  } else if (data === "armor"){
     return player[4];
-  } else {
+  } else if (data === "def"){
+    return player[5];
+  }else if (data === "activeDef"){
+    return player[6];
+  }else {
     console.log("input incorrect");
   }
 }
 
+function pushData(data, value, player){
+  if (player === 1) {
+    var player = player1;
+  } else if (player === 2) {
+    var player = player2;
+  }
+
+  if (data === "name"){
+    player[0] = value;
+    return;
+  } else if (data === "pv"){
+    player[1] = value;
+    return;
+  } else if (data === "weapon"){
+    player[2] = value;
+    return;
+  } else if (data === "dmg"){
+    player[3] = value;
+    return;
+  } else if (data === "armor"){
+    player[4] = value;
+    return;
+  } else if (data === "def"){
+    player[5] = value;
+    return;
+  } else if (data === "activeDef"){
+    player[6] = value;
+    return;
+  }else {
+    console.log("input incorrect");
+  }
+}
+
+//création de variable d'aisance pour rentre l'écriture plus compréhensible
+function whoAttack (){
+   if (playerTurn === 1) {
+        attacker = 1;
+        defender = 2;
+  } else {
+        attacker = 2;
+        defender = 1;
+  }
+}
+
+
+//------ FONCTIONS D'INITIALISATION ------
+function initPlayer(playerNumber){
+  //Loterie du loot, initialisation des armes/armures aléatoires
+  var playerClass = Math.round((Math.random()*2)+1);
+  if (playerClass === 1){
+    var pv = 250;
+    var weapon = "EPEE";
+    var dmg = 15;
+    var armor = "ACIER";
+    var def = 17;
+  } else if (playerClass === 2){
+    var pv = 200;
+    var weapon = "LANCE";
+    var dmg = 20;
+    var armor = "CUIR";
+    var def = 15;
+  } else if (playerClass === 3){
+    var pv = 175;
+    var weapon = "BAGUETTE DE FEU";
+    var dmg = 25;
+    var armor = "TISSU";
+    var def = 10;
+  } else {
+    console.log("T'as fait de la merde avec initPlayer" + playerClass);
+  }
+
+  //Si on initialise le joureur 1 (Humain)
+  if (playerNumber === 1) {
+    var name = "Arnaud"// IMPORTANT DE OUF !!!!!!!!!!!!!!!!!!!!A remettre en fin de dev prompt("Quel est le nom du joueur?");
+    //Tant que le nom est vide on redemande au joueur
+    while(name === "") {
+    name = prompt("Choisissez votre nom :");
+    }
+    player1.push(name,pv,weapon,dmg,armor,def,0);
+  }
+  //Si on initialise le joueur 2 (CPU)
+  else if (playerNumber === 2){
+    var name = nameList[Math.round(Math.random()*(nameList.length-1))];
+    player2.push(name,pv,weapon,dmg,armor,def,0);
+  }
+  
+  //Si les deux joueurs sont complets alors on affiche son équipement au joueur
+  if (player1.length>5 && player2.length>5){
+    console.log(player1);
+    console.log(player2);
+    console.log(player1[0] + " votre " + returnData("weapon", 1) + " et votre armure de " + returnData("armor", 1) + " vous on été attribués pour ce combat.");
+  }
+}
+
+//Fonction d'attaque simple pv = pv-dmg
+function attack(action) {
+//attaque normale
+  if (action === 1){
+    var modifier = 1;
+  }
+//attaque chargée
+  if (action === 2){
+    var modifier = 2.3;
+  return;  
+  }
+//vive attaque *0.8 
+  if (action === 3){
+    var modifier = 0.8;
+  return;  
+  }
+//contre attaque && attaque bouclier *0.6
+  if (action === 4){
+    var modifier = 0.6;
+  }
+  var pvAfterHit = returnData("pv", defender) - ((returnData("dmg", attacker)*modifier) - returnData("activeDef", defender));
+  console.log(pvAfterHit);
+  pushData("pv", pvAfterHit, defender);
+  return;  
+}
+
+//Cette fonction détermine la valeur du bouclier actif
+function defend(action){
+  //Defense normale
+    if (action === 1){
+      var modifier = 1;
+    } 
+  // Attaque bouclier 
+    if (action === 2){
+      var modifier = 0.4;
+    }
+    var def = returnData("def", defender) * modifier;
+    pushData("activeDef", def, defender);
+
+    //Reset
+    if (action === 0){
+      pushData("activeDef", 0, defender);
+    }
+}
+
+
+
+
+//------ BOUCLE PRINCIPALE ------
 initPlayer(1);
 initPlayer(2);
-console.log (returnData("weapon",1));
-console.log (returnData("weapon",2));
-
+whoAttack();
+attack(1);
+defend(1);
+console.log(player1);
+console.log(player2);

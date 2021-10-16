@@ -137,19 +137,19 @@ function initPlayer(playerNumber){
 
 //Fonction d'attaque simple pv = pv-dmg
 function attack(action) {
+  whoAttack ();
 //attaque normale
   if (action === 1){
+    console.log("ICI");
     var modifier = 1;
   }
 //attaque chargée
   if (action === 2){
-    var modifier = 2.3;
-  return;  
+    var modifier = 2.3; 
   }
 //vive attaque *0.8 
   if (action === 3){
     var modifier = 0.8;
-  return;  
   }
 //contre attaque && attaque bouclier *0.6
   if (action === 4){
@@ -158,11 +158,11 @@ function attack(action) {
   var pvAfterHit = returnData("pv", defender) - ((returnData("dmg", attacker)*modifier) - returnData("activeDef", defender));
   console.log(pvAfterHit);
   pushData("pv", pvAfterHit, defender);
-  return;  
 }
 
 //Cette fonction détermine la valeur du bouclier actif
 function defend(action){
+  whoAttack ();
   //Defense normale
     if (action === 1){
       var modifier = 1;
@@ -183,49 +183,63 @@ function defend(action){
 //Fonction d'affichage soit en alert soit en prompt
 function display(type){
   if (type === "prompt"){
-  var history4 = hist[3];
+  var history4 = hist[3] + playerTurn;
   var history3 = hist[2];
   var history2 = hist[1];
-  var history1 = hist[0] + playerTurn;
+  var history1 = hist[0];
   var activeLine = "Tu frappes et mets " + returnData("dmg",1); 
   var line3 = "________________________________________________";
   var line2 = "PV :" + returnData("pv",1) +"                                 |                                " +returnData("pv",2) + " PV";
   var line1 = "ATK :" + returnData("dmg",1) +" | DEF :" + returnData("def",1) +"               |               " +returnData("def",2) + " DEF | "+returnData("dmg",2) + " ATK";
   return prompt( history4+ "\n" + history3+ "\n" + history2+ "\n" + history1+"\n"+ line3+ "\n" + activeLine + "\n"+ line3+ "\n" + line2+ "\n" + line1);
   } else if (type === "alert"){
-      var history4 = hist[3];
+      var history4 = hist[3] + playerTurn;
       var history3 = hist[2];
       var history2 = hist[1];
-      var history1 = hist[0] + playerTurn;
+      var history1 = hist[0];
       var activeLine = "Tu frappes et mets " + returnData("dmg",1); 
       var line3 = "________________________________________________";
       var line2 = "PV :" + returnData("pv",1) +"                                 |                                " +returnData("pv",2) + " PV";
       var line1 = "ATK :" + returnData("dmg",1) +" | DEF :" + returnData("def",1) +"               |               " +returnData("def",2) + " DEF | "+returnData("dmg",2) + " ATK";
       return alert( history4+ "\n" + history3+ "\n" + history2+ "\n" + history1+"\n"+ line3+ "\n" + activeLine + "\n"+ line3+ "\n" + line2+ "\n" + line1);
+  } else if (type === "debug"){
+    console.log("Player1 : " + returnData("pv",1) + " | " + "Player2 : " + returnData("pv",2));
   }
 }
 
 function turnManager(){
   //si l'humain joue
   if (playerTurn === 1){
-    var input = display("prompt");
-    console.log(input);
+    var input = Number(display("prompt")); 
+      if (input >= 1 && input <= 4) {
+        attack(input);
+      }
     playerTurn = 2;
   } 
   // Sinon l'ordi joue
   if (playerTurn === 2 ) {
-    display("alert");
+    attack(1);
+    display("debug");
     playerTurn = 1;
   }
+  //check de l'arret du combat
+  if (input === "e" || returnData("pv",1) <= 0 ||returnData("pv",2) <= 0){
+    //Pour arréter le combat
+   combatRunning = false;
+   return;
+ }
 }
 
 
 //------ BOUCLE PRINCIPALE ------
 initPlayer(1);
 initPlayer(2);
+
 console.log(playerTurn);
 console.log(player1);
 console.log(player2);
-while (combatRunning === true){
+while(combatRunning === true){
   turnManager();
+  returnData("pv",1);
 }
+

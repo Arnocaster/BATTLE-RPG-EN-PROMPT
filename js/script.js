@@ -9,38 +9,46 @@ function welcome(){
 
 function initPlayer(playerNumber){
   //Loterie du loot, initialisation des armes/armures aléatoires
-  var playerClass = Math.round(Math.random()*3);
+  var playerClass = Math.round((Math.random()*2)+1);
   if (playerClass === 1){
     var weapon = "Epee";
+    var dmg = 25;
     var armor = "Acier";
+    var pv = 250;
   } else if (playerClass === 2){
     var weapon = "Lance";
+    var dmg = 20;
     var armor = "Cuir";
+    var pv = 250;
   } else if (playerClass === 3){
     var weapon = "Baguette de feu";
+    var dmg = 15;
     var armor = "Tissu";
+    var pv = 175;
   } else {
     console.log("T'as fait de la merde avec initPlayer" + playerClass);
   }
 
   //Si on initialise le joureur 1 (Humain)
   if (playerNumber === 1) {
-    var name = prompt("Quel est le nom du joueur?");
+    var name = "Arnaud"// A remettre en fin de dev prompt("Quel est le nom du joueur?");
     //Tant que le nom est vide on redemande au joueur
     while(name === "") {
     name = prompt("Quel est le nom du joueur?");
     }
-    player1.push(name,weapon,armor);
+    player1.push(name,weapon,armor,dmg,pv);
   }
   //Si on initialise le joueur 2 (CPU)
   else if (playerNumber === 2){
-    name = nameList[Math.round(Math.random())*nameList.length-1];
-    player2.push(name,weapon,armor);
-  }
-  
+    var name = nameList[Math.round(Math.random()*(nameList.length-1))];
+    player2.push(name,weapon,armor,dmg,pv);
+  }  
 }
 
+
+
 initPlayer(1);
-console.log(player1)
-console.log(player2)
+initPlayer(2);
+console.log(player1);
+console.log(player2);
 

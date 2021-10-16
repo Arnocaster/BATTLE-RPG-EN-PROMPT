@@ -6,7 +6,7 @@ var playerTurn = Math.round(Math.random()+1);
 var combatRunning = true;
 var defender = null;
 var attacker = null;
-var hist = ["","","","",""];
+var hist = ["","h1","h2","h3","h4"];
 
 
 
@@ -38,11 +38,14 @@ function returnData(data, player){
     return player[5];
   }else if (data === "activeDef"){
     return player[6];
-  }else {
+  }else if (data === "history") {
+    return hist[player];
+  } else {
     console.log("input incorrect");
   }
 }
 
+//Fonction qui envoie les données vers les tableaux player 1 et player 2
 function pushData(data, value, player){
   if (player === 1) {
     var player = player1;
@@ -71,7 +74,10 @@ function pushData(data, value, player){
   } else if (data === "activeDef"){
     player[6] = value;
     return;
-  }else {
+  }
+    else if (data === "history") {
+      hist[player] = value;
+    } else {
     console.log("input incorrect");
   }
 }
@@ -131,6 +137,7 @@ function initPlayer(playerNumber){
   
   //Si les deux joueurs sont complets alors on affiche son équipement au joueur
   if (player1.length>5 && player2.length>5){
+    pushData("history","C'est le joueur " + playerTurn + " qui commence. Que la bataille soit belle!", 0);
     console.log(player1[0] + " votre " + returnData("weapon", 1) + " et votre armure de " + returnData("armor", 1) + " vous on été attribués pour ce combat.");
   }
 }
@@ -140,7 +147,6 @@ function attack(action) {
   whoAttack ();
 //attaque normale
   if (action === 1){
-    console.log("ICI");
     var modifier = 1;
   }
 //attaque chargée
@@ -155,8 +161,7 @@ function attack(action) {
   if (action === 4){
     var modifier = 0.6;
   }
-  var pvAfterHit = returnData("pv", defender) - ((returnData("dmg", attacker)*modifier) - returnData("activeDef", defender));
-  console.log(pvAfterHit);
+  var pvAfterHit = Math.round( returnData("pv", defender) - ((returnData("dmg", attacker)*modifier) - returnData("activeDef", defender)));
   pushData("pv", pvAfterHit, defender);
 }
 
@@ -182,28 +187,33 @@ function defend(action){
 
 //Fonction d'affichage soit en alert soit en prompt
 function display(type){
-  if (type === "prompt"){
-  var history4 = hist[3] + playerTurn;
-  var history3 = hist[2];
-  var history2 = hist[1];
-  var history1 = hist[0];
-  var activeLine = "Tu frappes et mets " + returnData("dmg",1); 
+  
+  var history4 = hist[4] + playerTurn;
+  var history3 = hist[3];
+  var history2 = hist[2];
+  var history1 = hist[1];
+  var activeLine = hist[0]; 
   var line3 = "________________________________________________";
   var line2 = returnData("name",1) + "  PV :" + returnData("pv",1) + "                |               " + returnData("name",2) + "  " +returnData("pv",2) + " PV";
   var line1 = "ATK :" + returnData("dmg",1) +" | DEF :" + returnData("def",1) +"               |               " +returnData("def",2) + " DEF | "+returnData("dmg",2) + " ATK";
-  return prompt( history4+ "\n" + history3+ "\n" + history2+ "\n" + history1+"\n"+ line3+ "\n" + activeLine + "\n"+ line3+ "\n" + line2+ "\n" + line1);
+  
+  //En fontion du parmètre on affiche soit promt, soit alert, soit debug
+  if (type === "prompt"){
+    return prompt( history4+ "\n" + history3+ "\n" + history2+ "\n" + history1+"\n"+ line3+ "\n" + activeLine + "\n"+ line3+ "\n" + line2+ "\n" + line1);
   } else if (type === "alert"){
-      var history4 = hist[3] + playerTurn;
-      var history3 = hist[2];
-      var history2 = hist[1];
-      var history1 = hist[0];
-      var activeLine = "Tu frappes et mets " + returnData("dmg",1); 
-      var line3 = "________________________________________________";
-      var line2 = "PV :" + returnData("pv",1) +"                                 |                                " +returnData("pv",2) + " PV";
-      var line1 = "ATK :" + returnData("dmg",1) +" | DEF :" + returnData("def",1) +"               |               " +returnData("def",2) + " DEF | "+returnData("dmg",2) + " ATK";
       return alert( history4+ "\n" + history3+ "\n" + history2+ "\n" + history1+"\n"+ line3+ "\n" + activeLine + "\n"+ line3+ "\n" + line2+ "\n" + line1);
   } else if (type === "debug"){
     console.log("Player1 : " + returnData("pv",1) + " | " + "Player2 : " + returnData("pv",2));
+  }
+}
+
+//Fonction qui met à jour l'array historique
+function historyUpdate(){
+  var last = "";
+  for (var i = 1; i < hist.length; i++){
+    console.log(returnData("history",i));
+   // hist[i] = last;
+    //hist[i+1]=last
   }
 }
 
@@ -214,12 +224,15 @@ function turnManager(){
       if (input >= 1 && input <= 4) {
         attack(input);
       } 
+    historyUpdate();
     playerTurn = 2;
+    
   } 
   // Sinon l'ordi joue
   if (playerTurn === 2 ) {
     attack(1);
-    display("debug");
+    display("alert");
+    historyUpdate();
     playerTurn = 1;
   }
   //check de l'arret du combat
@@ -240,5 +253,6 @@ console.log(player1);
 console.log(player2);
 while(combatRunning === true){
   turnManager();
+
 }
 

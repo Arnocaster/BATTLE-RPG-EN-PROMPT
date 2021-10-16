@@ -189,7 +189,7 @@ function display(type){
   var history1 = hist[0];
   var activeLine = "Tu frappes et mets " + returnData("dmg",1); 
   var line3 = "________________________________________________";
-  var line2 = "PV :" + returnData("pv",1) +"                                 |                                " +returnData("pv",2) + " PV";
+  var line2 = returnData("name",1) + "  PV :" + returnData("pv",1) + "                |               " + returnData("name",2) + "  " +returnData("pv",2) + " PV";
   var line1 = "ATK :" + returnData("dmg",1) +" | DEF :" + returnData("def",1) +"               |               " +returnData("def",2) + " DEF | "+returnData("dmg",2) + " ATK";
   return prompt( history4+ "\n" + history3+ "\n" + history2+ "\n" + history1+"\n"+ line3+ "\n" + activeLine + "\n"+ line3+ "\n" + line2+ "\n" + line1);
   } else if (type === "alert"){
@@ -213,7 +213,7 @@ function turnManager(){
     var input = Number(display("prompt")); 
       if (input >= 1 && input <= 4) {
         attack(input);
-      }
+      } 
     playerTurn = 2;
   } 
   // Sinon l'ordi joue
@@ -240,6 +240,5 @@ console.log(player1);
 console.log(player2);
 while(combatRunning === true){
   turnManager();
-  returnData("pv",1);
 }
 

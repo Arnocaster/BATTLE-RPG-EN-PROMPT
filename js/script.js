@@ -3,9 +3,10 @@ var player1 = []
 var player2 = []
 var nameList = ["Dirsogrë", "Themelë", "Tadtel", "Rochmith", "Aërhûn", "Shebhir", "Aëthim", "Nanlenlon", "Rauaër", "Erhar", "Ilrod", "Iennan", "Harnag", "Vîngarrim", "Minbel", "Caldilrë", "Sîrum", "Luingad", "Loeodh", "Berdulië", "Gurdae", "Athbret", "Lamdundîr", "Athien", "Cuilim", "Tadum", "Ionoth", "Iaodh", "Galunië", "Cuifal", "Sadruïn", "Taethûdîr", "Lammîl", "Ergroron", "Sogbeth", "Mithrena", "ûrloerë", "Firrhaa", "Lhoelrim", "Iashelnir", "Ganpel", "Etheälië", "Thirdin", "Idhber", "Bretcau", "Amvîn", "Garleb", "Danduinil", "Mirmal", "Sënrau", "Lanrhyn", "Melduir", "Himduilë", "Calath", "Dothliathaë", "Theglam", "Moelaënir", "Bethvel", "Oeggae", "Belrha", "Mîlrhyn", "Ruïnteith", "Nîntuma", "Lathdul", "Gweeg", "Saeûr", "Cyrmeldîr", "Henmel", "Cenmae", "Lathdellon", "Nordan", "Faubar", "Geldothrë", "Fincau", "Lebna"]
 var playerTurn = Math.round(Math.random()+1);
-var combatRunning = false;
+var combatRunning = true;
 var defender = null;
 var attacker = null;
+var hist = ["","","","",""];
 
 
 
@@ -130,8 +131,6 @@ function initPlayer(playerNumber){
   
   //Si les deux joueurs sont complets alors on affiche son équipement au joueur
   if (player1.length>5 && player2.length>5){
-    console.log(player1);
-    console.log(player2);
     console.log(player1[0] + " votre " + returnData("weapon", 1) + " et votre armure de " + returnData("armor", 1) + " vous on été attribués pour ce combat.");
   }
 }
@@ -181,34 +180,52 @@ function defend(action){
     }
 }
 
+//Fonction d'affichage soit en alert soit en prompt
+function display(type){
+  if (type === "prompt"){
+  var history4 = hist[3];
+  var history3 = hist[2];
+  var history2 = hist[1];
+  var history1 = hist[0] + playerTurn;
+  var activeLine = "Tu frappes et mets " + returnData("dmg",1); 
+  var line3 = "________________________________________________";
+  var line2 = "PV :" + returnData("pv",1) +"                                 |                                " +returnData("pv",2) + " PV";
+  var line1 = "ATK :" + returnData("dmg",1) +" | DEF :" + returnData("def",1) +"               |               " +returnData("def",2) + " DEF | "+returnData("dmg",2) + " ATK";
+  return prompt( history4+ "\n" + history3+ "\n" + history2+ "\n" + history1+"\n"+ line3+ "\n" + activeLine + "\n"+ line3+ "\n" + line2+ "\n" + line1);
+  } else if (type === "alert"){
+      var history4 = hist[3];
+      var history3 = hist[2];
+      var history2 = hist[1];
+      var history1 = hist[0] + playerTurn;
+      var activeLine = "Tu frappes et mets " + returnData("dmg",1); 
+      var line3 = "________________________________________________";
+      var line2 = "PV :" + returnData("pv",1) +"                                 |                                " +returnData("pv",2) + " PV";
+      var line1 = "ATK :" + returnData("dmg",1) +" | DEF :" + returnData("def",1) +"               |               " +returnData("def",2) + " DEF | "+returnData("dmg",2) + " ATK";
+      return alert( history4+ "\n" + history3+ "\n" + history2+ "\n" + history1+"\n"+ line3+ "\n" + activeLine + "\n"+ line3+ "\n" + line2+ "\n" + line1);
+  }
+}
+
 function turnManager(){
   //si l'humain joue
   if (playerTurn === 1){
-    
-  } else {
-
+    var input = display("prompt");
+    console.log(input);
+    playerTurn = 2;
+  } 
+  // Sinon l'ordi joue
+  if (playerTurn === 2 ) {
+    display("alert");
+    playerTurn = 1;
   }
-
-}
-
-function displayPrompt(){
-  var ligne3 = "________________________________________________";
-  var ligne2 = "PV :" + returnData("pv",1) +"                                 |                                " +returnData("pv",2) + " PV";
-  var ligne1 = "ATK :" + returnData("dmg",1) +" | DEF :" + returnData("def",1) +"               |               " +returnData("def",2) + " DEF | "+returnData("dmg",2) + " ATK";
-  var answer = prompt( ligne3+ "\n" + ligne2+ "\n" + ligne1);
 }
 
 
 //------ BOUCLE PRINCIPALE ------
 initPlayer(1);
 initPlayer(2);
-whoAttack();
-attack(1);
-defend(1);
+console.log(playerTurn);
 console.log(player1);
 console.log(player2);
-attack(1);
-defend(0);
-console.log(player1);
-console.log(player2);
-displayPrompt();
+while (combatRunning === true){
+  turnManager();
+}

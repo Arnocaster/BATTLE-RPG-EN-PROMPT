@@ -3,8 +3,12 @@ var player1 = []
 var player2 = []
 var nameList = ["Dirsogrë", "Themelë", "Tadtel", "Rochmith", "Aërhûn", "Shebhir", "Aëthim", "Nanlenlon", "Rauaër", "Erhar", "Ilrod", "Iennan", "Harnag", "Vîngarrim", "Minbel", "Caldilrë", "Sîrum", "Luingad", "Loeodh", "Berdulië", "Gurdae", "Athbret", "Lamdundîr", "Athien", "Cuilim", "Tadum", "Ionoth", "Iaodh", "Galunië", "Cuifal", "Sadruïn", "Taethûdîr", "Lammîl", "Ergroron", "Sogbeth", "Mithrena", "ûrloerë", "Firrhaa", "Lhoelrim", "Iashelnir", "Ganpel", "Etheälië", "Thirdin", "Idhber", "Bretcau", "Amvîn", "Garleb", "Danduinil", "Mirmal", "Sënrau", "Lanrhyn", "Melduir", "Himduilë", "Calath", "Dothliathaë", "Theglam", "Moelaënir", "Bethvel", "Oeggae", "Belrha", "Mîlrhyn", "Ruïnteith", "Nîntuma", "Lathdul", "Gweeg", "Saeûr", "Cyrmeldîr", "Henmel", "Cenmae", "Lathdellon", "Nordan", "Faubar", "Geldothrë", "Fincau", "Lebna"]
 var playerTurn = Math.round(Math.random()+1);
-var defender;
-var attacker;
+var combatRunning = false;
+var defender = null;
+var attacker = null;
+
+
+
 function welcome(){
   alert("Bienvenue dans ce petit jeux, vous allez devoir vous battre contre l'ordinateur\n");
 }
@@ -177,7 +181,22 @@ function defend(action){
     }
 }
 
+function turnManager(){
+  //si l'humain joue
+  if (playerTurn === 1){
+    
+  } else {
 
+  }
+
+}
+
+function displayPrompt(){
+  var ligne3 = "________________________________________________";
+  var ligne2 = "PV :" + returnData("pv",1) +"                                 |                                " +returnData("pv",2) + " PV";
+  var ligne1 = "ATK :" + returnData("dmg",1) +" | DEF :" + returnData("def",1) +"               |               " +returnData("def",2) + " DEF | "+returnData("dmg",2) + " ATK";
+  var answer = prompt( ligne3+ "\n" + ligne2+ "\n" + ligne1);
+}
 
 
 //------ BOUCLE PRINCIPALE ------
@@ -188,3 +207,8 @@ attack(1);
 defend(1);
 console.log(player1);
 console.log(player2);
+attack(1);
+defend(0);
+console.log(player1);
+console.log(player2);
+displayPrompt();

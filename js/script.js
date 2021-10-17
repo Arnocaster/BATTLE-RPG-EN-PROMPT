@@ -6,7 +6,8 @@ var playerTurn = Math.round(Math.random()+1);
 var combatRunning = true;
 var defender = null;
 var attacker = null;
-var hist = ["h0","h1","h2","h3","h4"];
+var hist = [" "," "," "," "," "];
+var currentDialog = "";
 
 
 
@@ -82,7 +83,6 @@ function pushData(data, value, player){
   }
     else if (data === "history") {
       hist[player] = value;
-      console.log("pushData(history)" + value + " , " + player );
     } else {
     console.log("input incorrect");
   }
@@ -164,11 +164,13 @@ function attack(action) {
     var modifier = 0.8;
   }
 //contre attaque && attaque bouclier *0.6
-  if (action === 4){
+  if (action === 4 || action === 5){
     var modifier = 0.6;
   }
-  var pvAfterHit = Math.round( returnData("pv", defender) - ((returnData("dmg", attacker)*modifier) - returnData("activeDef", defender)));
+  var totalDmg = returnData("dmg", attacker)*modifier; 
+  var pvAfterHit = Math.round( returnData("pv", defender) - (totalDmg - returnData("activeDef", defender)));
   pushData("pv", pvAfterHit, defender);
+  return parseInt(totalDmg);
 }
 
 //Cette fonction détermine la valeur du bouclier actif
@@ -191,7 +193,7 @@ function defend(action){
     }
 }
 
-//Fonction d'affichage soit en alert soit en prompt
+//Fonction d'affichage soit en alert soit en prompt soit en console.log
 function display(type){
   
   var history4 = hist[4] + playerTurn;
@@ -213,36 +215,66 @@ function display(type){
   }
 }
 
+//Fonction contenant tous les dialogues dynamiques.
+function dialog(dialRef, data1, data2, data3, data4, data5){
+  var currentString = "";
+  if (dialRef === "A1"){
+    // data1 = $nomAttaquant data2 = $nomDefenseur data3 = $dmg 
+    return data1 + " frappe " + data2 + " et lui inflige " + data3 + " de dégats";
+  } else if (dialRef === "A2"){
+    return data1 + " frappe FORT " + data2 + " et lui inflige " + data3 + " de dégats";
+  } else if (dialRef === "A3"){ 
+    return data1 + " surprend " + data2 + " par sa vitesse et lui inflige " + data3 + " de dégats";
+  } else if (dialRef === "A4"){
+    //data1 = $nomAttaquant data2 = $nomDefenseur data3 = $dmg data4 = $activedef
+    return data2 + " esquive l'attaque de " + data1 + " et lui inflige " + data3 + " dommages";
+  } else if (dialRef === "A5"){
+    // $nomAttaquant + frappe + $nomDefenseur + 
+    return data1 + "  frappe " + data2 + " bouclier relevé et lui inflige " + data3 + " de dégats.";
+  } 
+}
+
 //Fonction qui met à jour l'array historique
 function historyUpdate(){
   for (var i = hist.length-1; i >= 0 ; i--){
     pushData("history",returnData("history",i),i+1);
  }
- console.log(hist);
+ pushData("history",currentDialog,0);
 }
 
 //Gestion du tour par tour
 function turnManager(){
-  //si l'humain joue
-  if (playerTurn === 1){
-    var input = Number(display("prompt")); 
-      if (input >= 1 && input <= 4) {
-        attack(input);
-      } 
-    historyUpdate();
-    playerTurn = 2;
-    
-  } 
-  // Sinon l'ordi joue
-  if (playerTurn === 2 ) {
-    attack(1);
-    display("alert");
-    historyUpdate();
-    playerTurn = 1;
-  }
+    //Si l'humain joue
+    if (playerTurn === 1 ){
+      //On affiche le prompt
+      var input = display("prompt");
+      //on le transforme en nombre
+      var nInput = Number(input);
+      //Si c'est le joueur deux
+    } if (playerTurn === 2){
+      //Il choisi une attaque au hasard -- On mettra une fonction ia ici au besoin
+      var nInput = Math.round((Math.random()*4)+1);
+      //On transforme le number en string pour la fonction historyUpdate()
+      var input = nInput.toString();
+      //On affiche l'écran
+      display("alert");
+    }
+
+    //Déroulé du combat
+    var dataCombat = attack(nInput);
+    console.log(dataCombat);
+    if (playerTurn === 1 ) {var playerNotPlaying =  2} else {var playerNotPlaying =  1};
+    //Mise a jour du dialogue actif
+    currentDialog = dialog("A"+input,returnData("name",playerTurn),returnData("name",playerNotPlaying),dataCombat,"data4");
+    //Mise à jour de l'historique
+    historyUpdate()
+
+    //Changement de joueur actif
+    if (playerTurn === 1 ) { playerTurn = 2} else {playerTurn = 1};
+
   //check de l'arret du combat
-  if (input === "e" || returnData("pv",1) <= 0 ||returnData("pv",2) <= 0){
-    //Pour arréter le combat
+    if (input === "e" || returnData("pv",1) <= 0 ||returnData("pv",2) <= 0){
+    //Pour arréter le combat et sortir de la boucle while
    combatRunning = false;
    return;
  }

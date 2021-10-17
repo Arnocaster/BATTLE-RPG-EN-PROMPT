@@ -177,23 +177,34 @@ function playerAction(input) {
     //attaque normale
     if (action === "Normale") {
       var modifier = 1;
+      var success = 0;
     }
     //attaque chargée
     if (action === "Chargée") {
       var modifier = 2.3;
+      var success = 2;
     }
     //vive attaque *0.8 
     if (action === "Vive-attaque") {
       var modifier = 0.8;
+      var success = 2;
     }
     //contre attaque && attaque bouclier *0.6
     if (action === "Contre-attaque" || action === "Attaque-bouclier") {
       var modifier = 0.6;
+      var success = 2;
     }
-    var totalDmg = returnData("dmg", attacker) * modifier;
-    var pvAfterHit = Math.round(returnData("pv", defender) - (totalDmg - returnData("activeDef", defender)));
-    pushData("pv", pvAfterHit, defender);
-    return [action,parseInt(totalDmg)];
+    //On jette un dé pour savoir si on réussi le coup.
+    var dice = Math.round((Math.random()*11)+1);
+    if (dice > success){
+      var totalDmg = returnData("dmg", attacker) * modifier;
+      var pvAfterHit = Math.round(returnData("pv", defender) - (totalDmg - returnData("activeDef", defender)));
+      pushData("pv", pvAfterHit, defender);
+      return [action,parseInt(totalDmg)];
+    } else {
+      action = "Fail";
+      return [action,0];
+    }
   }
   if (action === "Defense" ){
     activeDef = returnData("def",attacker)*1;
@@ -234,9 +245,9 @@ function display(type) {
 function dialog(dialRef, data1, data2, data3, data4, data5) {
   if (dialRef === "Normale") {
     // data1 = $nomAttaquant data2 = $nomDefenseur data3 = $dmg 
-    return compteurTour + "." + data1 + " frappe " + data2 + " et lui inflige " + data3 + " de dégats";
+    return compteurTour + "." + data1 + " frappe et inflige " + data3 + " de dégats à " + data2 ;
   } else if (dialRef === "Chargée") {
-    return compteurTour + "." + data1 + " frappe FORT " + data2 + " et lui inflige " + data3 + " de dégats";
+    return compteurTour + "." + data1 + " frappe FORT et inflige " + data3 + " de dégats à " + data2;
   } else if (dialRef === "Vive-attaque") {
     return compteurTour + "." + data1 + " surprend " + data2 + " par sa vitesse et lui inflige " + data3 + " de dégats";
   } else if (dialRef === "Contre-attaque") {
@@ -247,7 +258,10 @@ function dialog(dialRef, data1, data2, data3, data4, data5) {
     return compteurTour + "." +data1 + "  frappe " + data2 + " bouclier relevé et lui inflige " + data3 + " de dégats.";
   } else if (dialRef === "Defense") {
     // $nomAttaquant + frappe + $nomDefenseur + 
-    return compteurTour + "." +data1 + "  se défend, il bloquera XXX dégats au prochain tour";
+    return compteurTour + "." +data1 + "  se défend, il bloquera " + data4 + " dégats au prochain tour";
+  } else if (dialRef === "Fail") {
+    // $nomAttaquant + frappe + $nomDefenseur + 
+    return compteurTour + "." +data1 + " rate sa manoeuve! C'est l'echec total!";
   }
 }
 
@@ -277,10 +291,9 @@ function turnManager() {
 
   //Déroulé du combat
   //Récupère la data renvoyée de playerAction
-
   var dataCombat = playerAction(nInput);
   //Mise a jour du dialogue actif
-  currentDialog = dialog(dataCombat[0], returnData("name", attacker), returnData("name", defender), dataCombat[1], "data4");
+  currentDialog = dialog(dataCombat[0], returnData("name", attacker), returnData("name", defender), dataCombat[1], returnData("activeDef",attacker));
   //Mise à jour de l'historique
   compteurTour++;
   historyUpdate();

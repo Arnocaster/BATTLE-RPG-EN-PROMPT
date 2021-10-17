@@ -4,6 +4,7 @@ var player2 = []
 var nameList = ["Dirsogrë", "Themelë", "Tadtel", "Rochmith", "Aërhûn", "Shebhir", "Aëthim", "Nanlenlon", "Rauaër", "Erhar", "Ilrod", "Iennan", "Harnag", "Vîngarrim", "Minbel", "Caldilrë", "Sîrum", "Luingad", "Loeodh", "Berdulië", "Gurdae", "Athbret", "Lamdundîr", "Athien", "Cuilim", "Tadum", "Ionoth", "Iaodh", "Galunië", "Cuifal", "Sadruïn", "Taethûdîr", "Lammîl", "Ergroron", "Sogbeth", "Mithrena", "ûrloerë", "Firrhaa", "Lhoelrim", "Iashelnir", "Ganpel", "Etheälië", "Thirdin", "Idhber", "Bretcau", "Amvîn", "Garleb", "Danduinil", "Mirmal", "Sënrau", "Lanrhyn", "Melduir", "Himduilë", "Calath", "Dothliathaë", "Theglam", "Moelaënir", "Bethvel", "Oeggae", "Belrha", "Mîlrhyn", "Ruïnteith", "Nîntuma", "Lathdul", "Gweeg", "Saeûr", "Cyrmeldîr", "Henmel", "Cenmae", "Lathdellon", "Nordan", "Faubar", "Geldothrë", "Fincau", "Lebna"]
 var playerTurn = Math.round(Math.random() + 1);
 var combatRunning = true;
+var compteurTour = 1;
 var defender = null;
 var attacker = null;
 var hist = [" ", " ", " ", " ", " "];
@@ -192,7 +193,12 @@ function playerAction(input) {
     var totalDmg = returnData("dmg", attacker) * modifier;
     var pvAfterHit = Math.round(returnData("pv", defender) - (totalDmg - returnData("activeDef", defender)));
     pushData("pv", pvAfterHit, defender);
-    return parseInt(totalDmg);
+    return [action,parseInt(totalDmg)];
+  }
+  if (action === "Defense" ){
+    activeDef = returnData("def",attacker)*1;
+    pushData("activeDef",activeDef,attacker);
+    return [action, 0];
   }
 }
 
@@ -215,11 +221,10 @@ function display(type) {
     var lineOptions = " "
     for (var i = 0; i < currentWeapon.length; i++){
       lineOptions += i+1 + ")" + currentWeapon[i] + "  ";
-      console.log(lineOptions);
     }
-    return prompt(history3 + "\n" + history2 + "\n" + history1 + "\n" + line3 + "\n" + activeLine + "\n" + line3 + "\n" + line2 + "\n" + line1 + "\n" + lineOptions);
+    return prompt( history2 + "\n" + history1 + "\n" + line3 + "\n" + activeLine + "\n" + line3 + "\n" + line2 + "\n" + line1 + "\n" + lineOptions);
   } else if (type === "alert") {
-    return alert(history3 + "\n" + history2 + "\n" + history1 + "\n" + line3 + "\n" + activeLine + "\n" + line3 + "\n" + line2 + "\n" + line1);
+    return alert( history2 + "\n" + history1 + "\n" + line3 + "\n" + activeLine + "\n" + line3 + "\n" + line2 + "\n" + line1);
   } else if (type === "debug") {
     console.log("Player1 : " + returnData("pv", 1) + " | " + "Player2 : " + returnData("pv", 2));
   }
@@ -227,19 +232,22 @@ function display(type) {
 
 //Fonction contenant tous les dialogues dynamiques.
 function dialog(dialRef, data1, data2, data3, data4, data5) {
-  if (dialRef === "A1") {
+  if (dialRef === "Normale") {
     // data1 = $nomAttaquant data2 = $nomDefenseur data3 = $dmg 
-    return data1 + " frappe " + data2 + " et lui inflige " + data3 + " de dégats";
-  } else if (dialRef === "A2") {
-    return data1 + " frappe FORT " + data2 + " et lui inflige " + data3 + " de dégats";
-  } else if (dialRef === "A3") {
-    return data1 + " surprend " + data2 + " par sa vitesse et lui inflige " + data3 + " de dégats";
-  } else if (dialRef === "A4") {
+    return compteurTour + "." + data1 + " frappe " + data2 + " et lui inflige " + data3 + " de dégats";
+  } else if (dialRef === "Chargée") {
+    return compteurTour + "." + data1 + " frappe FORT " + data2 + " et lui inflige " + data3 + " de dégats";
+  } else if (dialRef === "Vive-attaque") {
+    return compteurTour + "." + data1 + " surprend " + data2 + " par sa vitesse et lui inflige " + data3 + " de dégats";
+  } else if (dialRef === "Contre-attaque") {
     //data1 = $nomAttaquant data2 = $nomDefenseur data3 = $dmg data4 = $activedef
-    return data2 + " esquive l'attaque de " + data1 + " et lui inflige " + data3 + " dommages";
-  } else if (dialRef === "A5") {
+    return compteurTour + "." + data2 + " esquive l'attaque de " + data1 + " et lui inflige " + data3 + " dommages";
+  } else if (dialRef === "Attaque-bouclier") {
     // $nomAttaquant + frappe + $nomDefenseur + 
-    return data1 + "  frappe " + data2 + " bouclier relevé et lui inflige " + data3 + " de dégats.";
+    return compteurTour + "." +data1 + "  frappe " + data2 + " bouclier relevé et lui inflige " + data3 + " de dégats.";
+  } else if (dialRef === "Defense") {
+    // $nomAttaquant + frappe + $nomDefenseur + 
+    return compteurTour + "." +data1 + "  se défend, il bloquera XXX dégats au prochain tour";
   }
 }
 
@@ -252,11 +260,12 @@ function turnManager() {
     var input = display("prompt");
     //on le transforme en nombre
     var nInput = Number(input);
-    if (nInput < 1 || nInput > 4) {
-      var input = display("prompt");
+    if(nInput < 1 || nInput > 4) {
+      return;
     }
-    //Si c'est le joueur deux
+    
   }
+  //Si c'est le joueur deux
   if (attacker === 2) {
     //Il choisi une attaque au hasard -- On mettra une fonction ia ici au besoin
     var nInput = Math.round((Math.random() * 3) + 1);
@@ -271,9 +280,11 @@ function turnManager() {
 
   var dataCombat = playerAction(nInput);
   //Mise a jour du dialogue actif
-  currentDialog = dialog("A" + input, returnData("name", attacker), returnData("name", defender), dataCombat, "data4");
+  currentDialog = dialog(dataCombat[0], returnData("name", attacker), returnData("name", defender), dataCombat[1], "data4");
   //Mise à jour de l'historique
-  historyUpdate()
+  compteurTour++;
+  historyUpdate();
+ 
 
   //Changement de joueur actif
   if (playerTurn === 1) {

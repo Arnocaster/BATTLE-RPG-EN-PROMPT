@@ -6,7 +6,7 @@ var playerTurn = Math.round(Math.random()+1);
 var combatRunning = true;
 var defender = null;
 var attacker = null;
-var hist = ["","h1","h2","h3","h4"];
+var hist = ["h0","h1","h2","h3","h4"];
 
 
 
@@ -18,27 +18,30 @@ function welcome(){
 //Fonction qui  récupère les données dans les tableaux 
 //en fonction d'un string(name,weapon,armor,dmg,pv) et du numéro de joueur (1,2).
 function returnData(data, player){
+  if (data !== "history"){
   if (player === 1) {
     var player = player1;
   } else if (player === 2) {
     var player = player2;
   }
 
-  if (data === "name"){
-    return player[0];
-  } else if (data === "pv"){
-    return player[1];
-  } else if (data === "weapon"){
-    return player[2];
-  } else if (data === "dmg"){
-    return player[3];
-  } else if (data === "armor"){
-    return player[4];
-  } else if (data === "def"){
-    return player[5];
-  }else if (data === "activeDef"){
-    return player[6];
-  }else if (data === "history") {
+    if (data === "name"){
+      return player[0];
+    } else if (data === "pv"){
+      return player[1];
+    } else if (data === "weapon"){
+      return player[2];
+    } else if (data === "dmg"){
+      return player[3];
+    } else if (data === "armor"){
+      return player[4];
+    } else if (data === "def"){
+      return player[5];
+    }else if (data === "activeDef"){
+      return player[6];
+    }
+  }
+  else if (data === "history") {
     return hist[player];
   } else {
     console.log("input incorrect");
@@ -47,7 +50,8 @@ function returnData(data, player){
 
 //Fonction qui envoie les données vers les tableaux player 1 et player 2
 function pushData(data, value, player){
-  if (player === 1) {
+  if (data !== "history"){
+    if(player === 1) {
     var player = player1;
   } else if (player === 2) {
     var player = player2;
@@ -75,8 +79,10 @@ function pushData(data, value, player){
     player[6] = value;
     return;
   }
+  }
     else if (data === "history") {
       hist[player] = value;
+      console.log("pushData(history)" + value + " , " + player );
     } else {
     console.log("input incorrect");
   }
@@ -209,14 +215,13 @@ function display(type){
 
 //Fonction qui met à jour l'array historique
 function historyUpdate(){
-  var last = "";
-  for (var i = 1; i < hist.length; i++){
-    console.log(returnData("history",i));
-   // hist[i] = last;
-    //hist[i+1]=last
-  }
+  for (var i = hist.length-1; i >= 0 ; i--){
+    pushData("history",returnData("history",i),i+1);
+ }
+ console.log(hist);
 }
 
+//Gestion du tour par tour
 function turnManager(){
   //si l'humain joue
   if (playerTurn === 1){

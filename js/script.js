@@ -10,6 +10,7 @@ var defender = null;
 var attacker = null;
 var hist = [" ", " ", " ", " ", " "];
 var currentDialog = "";
+weapons = [epee,lance,baguette]
 var epee = ["Normale", "Chargée", "Vive-attaque", "Defense"]
 var lance = ["Normale", "Chargée", "Attaque-bouclier", "Defense"]
 var baguette = ["Normale", "Chargée", "Vive-attaque", "Contre-attaque"]
@@ -96,7 +97,7 @@ function pushData(data, value, player) {
 }
 
 
-function arrayMngr (type,array,index,value,separator = ""){
+function arrayMgmt (type,array,index,value,separator = ""){
   var myString = "";
   if (index >= 0 && index <= array.length){
       switch(type){
@@ -175,11 +176,15 @@ function weaponSelector(weapon) {
 
 //Fonction qui met à jour l'array historique
 function historyUpdate() {
-  for (var i = hist.length - 1; i >= 0; i--) {
-    //On 
-    pushData("history", returnData("history", i), i + 1);
-  }
-  pushData("history", currentDialog, 0);
+  hist = arrayMgmt("add",hist,0,currentDialog,null);
+  hits = arrayMgmt("delete",hist,hist.length,null,null);
+  /* Depreciated
+    for (var i = hist.length - 1; i >= 0; i--) {
+      //On 
+      pushData("history", returnData("history", i), i + 1);
+    }
+    pushData("history", currentDialog, 0);
+    */
 }
 
 //------ FONCTIONS D'INITIALISATION ------
@@ -225,7 +230,9 @@ function initPlayer(playerNumber) {
 
   //Si les deux joueurs sont complets alors on affiche son équipement au joueur
   if (player1.length > 5 && player2.length > 5) {
-    pushData("history", "C'est le joueur " + playerTurn + " qui commence. Que la bataille soit belle!", 0);
+
+    hist = arrayMgmt("modify",hist,0,dialog("whoStart",playerTurn),null);
+    //pushData("history", "C'est le joueur " + playerTurn + " qui commence. Que la bataille soit belle!", 0);
     console.log(player1[0] + " votre " + returnData("weapon", 1) + " et votre armure de " + returnData("armor", 1) + " vous on été attribués pour ce combat.");
   }
 }
@@ -296,6 +303,8 @@ function dialog(dialRef, data1, data2, data3, data4, data5) {
   } else if (dialRef === "jumpTurn") {
     // $nomAttaquant + frappe + $nomDefenseur + 
     return compteurTour + "." + data1 + "saute son tour";
+  } else if (dialRef === "whoStart") {
+    return "C'est le joueur " + data1 + " qui commence. Que la bataille soit belle!"
   }
 }
 

@@ -1,6 +1,7 @@
 // Déclaration des variables
 var player1 = []
 var player2 = []
+var turnToCome = []
 var nameList = ["Dirsogrë", "Themelë", "Tadtel", "Rochmith", "Aërhûn", "Shebhir", "Aëthim", "Nanlenlon", "Rauaër", "Erhar", "Ilrod", "Iennan", "Harnag", "Vîngarrim", "Minbel", "Caldilrë", "Sîrum", "Luingad", "Loeodh", "Berdulië", "Gurdae", "Athbret", "Lamdundîr", "Athien", "Cuilim", "Tadum", "Ionoth", "Iaodh", "Galunië", "Cuifal", "Sadruïn", "Taethûdîr", "Lammîl", "Ergroron", "Sogbeth", "Mithrena", "ûrloerë", "Firrhaa", "Lhoelrim", "Iashelnir", "Ganpel", "Etheälië", "Thirdin", "Idhber", "Bretcau", "Amvîn", "Garleb", "Danduinil", "Mirmal", "Sënrau", "Lanrhyn", "Melduir", "Himduilë", "Calath", "Dothliathaë", "Theglam", "Moelaënir", "Bethvel", "Oeggae", "Belrha", "Mîlrhyn", "Ruïnteith", "Nîntuma", "Lathdul", "Gweeg", "Saeûr", "Cyrmeldîr", "Henmel", "Cenmae", "Lathdellon", "Nordan", "Faubar", "Geldothrë", "Fincau", "Lebna"]
 var playerTurn = Math.round(Math.random() + 1);
 var combatRunning = true;
@@ -43,6 +44,8 @@ function returnData(data, player) {
       return player[5];
     } else if (data === "activeDef") {
       return player[6];
+    } else if (data === "jumpTurn") {
+      return player[7];
     }
   } else if (data === "history") {
     return hist[player];
@@ -81,6 +84,9 @@ function pushData(data, value, player) {
     } else if (data === "activeDef") {
       player[6] = value;
       return;
+    } else if (data === "jumpTurn") {
+      player[7] = value;
+      return;
     }
   } else if (data === "history") {
     hist[player] = value;
@@ -88,6 +94,63 @@ function pushData(data, value, player) {
     console.log("input incorrect");
   }
 }
+
+
+function arrayMngr (type,array,index,value,separator = ""){
+  var myString = "";
+  if (index >= 0 && index <= array.length){
+      switch(type){
+          case "readOne" :     
+              return array[index];
+          case "readAll" :     
+              for (var i = 0; i < array.length ;i++){
+                  myString += array[i] + separator;
+              }
+              return myString;
+          case "add" :
+          
+              var tempArray = [];
+              var before = array.slice(0,index);
+              var after = array.slice(index,array.length);
+
+              for (var i=0 ; i < before.length; i++){
+              tempArray.push(before[i]);
+              }
+
+              tempArray.push(value);
+
+              for (var i=0 ; i < after.length; i++){
+              tempArray.push(after[i])
+              }
+              for (var i = 0; i < array.length ;i++){
+                  myString += array[i] + separator;
+              }
+              return tempArray
+              
+          case "modify" :
+              array[index] = value
+              return array;
+          case "delete" :
+              var tempArray = [];
+              var before = array.slice(0,index);
+              var after = array.slice(index+1,array.length);
+
+              for (var i=0 ; i < before.length; i++){
+              tempArray.push(before[i]);
+              }
+              for (var i=0 ; i < after.length; i++){
+              tempArray.push(after[i])
+              }
+              for (var i = 0; i < array.length ;i++){
+                  myString += array[i] + separator;
+              }
+              return tempArray
+      }
+  } else {return "cet index n'existe pas " + type + "[" + index + "]"}
+
+}
+
+
 
 //création de variable d'aisance pour rentre l'écriture plus compréhensible
 function whoAttack() {
@@ -107,12 +170,13 @@ function weaponSelector(weapon) {
     return lance;
   } else if (weapon === "BAGUETTE DE FEU") {
     return baguette;
-  } 
+  }
 }
 
 //Fonction qui met à jour l'array historique
 function historyUpdate() {
   for (var i = hist.length - 1; i >= 0; i--) {
+    //On 
     pushData("history", returnData("history", i), i + 1);
   }
   pushData("history", currentDialog, 0);
@@ -151,12 +215,12 @@ function initPlayer(playerNumber) {
     while (name === "") {
       name = prompt("Choisissez votre nom :");
     }
-    player1.push(name, pv, weapon, dmg, armor, def, 0);
+    player1.push(name, pv, weapon, dmg, armor, def, 0, false);
   }
   //Si on initialise le joueur 2 (CPU)
   else if (playerNumber === 2) {
     var name = nameList[Math.round(Math.random() * (nameList.length - 1))];
-    player2.push(name, pv, weapon, dmg, armor, def, 0);
+    player2.push(name, pv, weapon, dmg, armor, def, 0, false);
   }
 
   //Si les deux joueurs sont complets alors on affiche son équipement au joueur
@@ -166,55 +230,22 @@ function initPlayer(playerNumber) {
   }
 }
 
-//Fonction d'attaque 
-function playerAction(input) {
-  whoAttack();
-  //Choix du numéro d'attaque brut pour les attaques spéciales (action) en fonction de l'arme.
 
-  var action = weaponSelector(returnData("weapon", attacker))
-  var action = action[input-1];
-  if (action != "Defense") {
-    //attaque normale
-    if (action === "Normale") {
-      var modifier = 1;
-      var success = 0;
-    }
-    //attaque chargée
-    if (action === "Chargée") {
-      var modifier = 2.3;
-      var success = 2;
-    }
-    //vive attaque *0.8 
-    if (action === "Vive-attaque") {
-      var modifier = 0.8;
-      var success = 2;
-    }
-    //contre attaque && attaque bouclier *0.6
-    if (action === "Contre-attaque" || action === "Attaque-bouclier") {
-      var modifier = 0.6;
-      var success = 2;
-    }
-    //On jette un dé pour savoir si on réussi le coup.
-    var dice = Math.round((Math.random()*11)+1);
-    if (dice > success){
-      var totalDmg = returnData("dmg", attacker) * modifier;
-      var pvAfterHit = Math.round(returnData("pv", defender) - (totalDmg - returnData("activeDef", defender)));
-      pushData("pv", pvAfterHit, defender);
-      return [action,parseInt(totalDmg)];
-    } else {
-      action = "Fail";
-      return [action,0];
-    }
-  }
-  if (action === "Defense" ){
-    activeDef = returnData("def",attacker)*1;
-    pushData("activeDef",activeDef,attacker);
-    return [action, 0];
-  }
-}
 
 //Fonction d'affichage soit en alert soit en prompt soit en console.log
 function display(type) {
+  //Si
+  if (returnData("activeDef",1) > 0) {
+    var activeDef1 = "(+" + returnData("activeDef",1)+")"
+  } else {
+    var activeDef1 = "      "
+  }
+  if (returnData("activeDef",2) > 0) {
+    var activeDef2 = "(+" + returnData("activeDef",1) + ")"; 
+  } else {
+    var activeDef2 = "      "
+  }
+
   //var history4 = hist[4] 
   var history3 = hist[3] + returnData("weapon", playerTurn);
   var history2 = hist[2];
@@ -222,7 +253,7 @@ function display(type) {
   var activeLine = hist[0];
   var line3 = "________________________________________________";
   var line2 = returnData("name", 1) + "  PV :" + returnData("pv", 1) + "                |               " + returnData("name", 2) + "  " + returnData("pv", 2) + " PV";
-  var line1 = "ATK :" + returnData("dmg", 1) + " | DEF :" + returnData("def", 1) + "               |               " + returnData("def", 2) + " DEF | " + returnData("dmg", 2) + " ATK";
+  var line1 = "ATK  " + returnData("dmg", 1) + " | DEF  " + returnData("def", 1) + activeDef1 + "        |         " + "ATK  " + returnData("dmg", 2) + " | DEF  " + returnData("def", 2) + activeDef2 ;
   //actionAvailable = for (var i=0; i < weaponSelector(returnData("weapon",playerTurn).length,i))
 
   //En fontion du parmètre on affiche soit promt, soit alert, soit debug
@@ -230,12 +261,12 @@ function display(type) {
     //Affichage des options possible ssi prompt
     var currentWeapon = weaponSelector(returnData("weapon", playerTurn));
     var lineOptions = " "
-    for (var i = 0; i < currentWeapon.length; i++){
-      lineOptions += i+1 + ")" + currentWeapon[i] + "  ";
+    for (var i = 0; i < currentWeapon.length; i++) {
+      lineOptions += i + 1 + ")" + currentWeapon[i] + "  ";
     }
-    return prompt( history2 + "\n" + history1 + "\n" + line3 + "\n" + activeLine + "\n" + line3 + "\n" + line2 + "\n" + line1 + "\n" + lineOptions);
+    return prompt(history2 + "\n" + history1 + "\n" + line3 + "\n" + activeLine + "\n" + line3 + "\n" + line2 + "\n" + line1 + "\n" + lineOptions);
   } else if (type === "alert") {
-    return alert( history2 + "\n" + history1 + "\n" + line3 + "\n" + activeLine + "\n" + line3 + "\n" + line2 + "\n" + line1);
+    return alert(history2 + "\n" + history1 + "\n" + line3 + "\n" + activeLine + "\n" + line3 + "\n" + line2 + "\n" + line1);
   } else if (type === "debug") {
     console.log("Player1 : " + returnData("pv", 1) + " | " + "Player2 : " + returnData("pv", 2));
   }
@@ -245,7 +276,7 @@ function display(type) {
 function dialog(dialRef, data1, data2, data3, data4, data5) {
   if (dialRef === "Normale") {
     // data1 = $nomAttaquant data2 = $nomDefenseur data3 = $dmg 
-    return compteurTour + "." + data1 + " frappe et inflige " + data3 + " de dégats à " + data2 ;
+    return compteurTour + "." + data1 + " frappe et inflige " + data3 + " de dégats à " + data2;
   } else if (dialRef === "Chargée") {
     return compteurTour + "." + data1 + " frappe FORT et inflige " + data3 + " de dégats à " + data2;
   } else if (dialRef === "Vive-attaque") {
@@ -255,32 +286,91 @@ function dialog(dialRef, data1, data2, data3, data4, data5) {
     return compteurTour + "." + data2 + " esquive l'attaque de " + data1 + " et lui inflige " + data3 + " dommages";
   } else if (dialRef === "Attaque-bouclier") {
     // $nomAttaquant + frappe + $nomDefenseur + 
-    return compteurTour + "." +data1 + "  frappe " + data2 + " bouclier relevé et lui inflige " + data3 + " de dégats.";
+    return compteurTour + "." + data1 + "  frappe " + data2 + " bouclier relevé et lui inflige " + data3 + " de dégats.";
   } else if (dialRef === "Defense") {
     // $nomAttaquant + frappe + $nomDefenseur + 
-    return compteurTour + "." +data1 + "  se défend, il bloquera " + data4 + " dégats au prochain tour";
+    return compteurTour + "." + data1 + "  se défend, il bloquera " + data4 + " dégats au prochain tour";
   } else if (dialRef === "Fail") {
     // $nomAttaquant + frappe + $nomDefenseur + 
-    return compteurTour + "." +data1 + " rate sa manoeuve! C'est l'echec total!";
+    return compteurTour + "." + data1 + " rate sa manoeuve! C'est l'echec total!";
+  } else if (dialRef === "jumpTurn") {
+    // $nomAttaquant + frappe + $nomDefenseur + 
+    return compteurTour + "." + data1 + "saute son tour";
+  }
+}
+
+//Fonction d'attaque 
+function playerAction(input) {
+  whoAttack();
+  //Choix du numéro d'attaque brut pour les attaques spéciales (action) en fonction de l'arme.
+  
+  if (input != "Defense") {
+    //attaque normale
+    if (input === "Normale") {
+      var modifier = 1;
+      var success = 0;
+    }
+    //attaque chargée
+    if (input === "Chargée") {
+      var modifier = 2.3;
+      var success = 1;
+    }
+    if (input === "Chargée_hit") {
+      var modifier = 2.3;
+      var success = 2;
+    }
+    //vive attaque *0.8 
+    if (input === "Vive-attaque") {
+      var modifier = 0.8;
+      var success = 2;
+    }
+    //contre attaque && attaque bouclier *0.6
+    if (input === "Contre-attaque" || input === "Attaque-bouclier") {
+      var modifier = 0.6;
+      var success = 2;
+    }
+
+    //On jette un dé pour savoir si on réussi le coup.
+    var dice = Math.round((Math.random() * 11) + 1);
+    if (dice > success) {
+      //Calcul des domages : dommage Arme * modifier - defense active;
+      var totalDmg = (returnData("dmg", attacker) * modifier) - returnData("activeDef", defender);
+      var pvAfterHit = Math.round(returnData("pv", defender) - totalDmg );
+      if (pvAfterHit < 0) {pvAfterHit = 0;}
+      //Mise à jour des PV chez le défendant
+      pushData("pv", pvAfterHit, defender);
+      //On reset la defense active
+      pushData("activeDef", 0, defender);
+      return [input, parseInt(totalDmg)];
+    } else {
+      input = "Fail";
+      return [input, 0];
+  }
+  }
+  if (input === "Defense") {
+    activeDef = Math.round(returnData("def", attacker) * 1);
+    pushData("activeDef", activeDef, attacker);
+    return [input, 0];
   }
 }
 
 //Gestion du tour par tour
 function turnManager() {
   whoAttack();
+  //On récupère l'array de l'arme de l'attaquant
+  atkWeapon = weaponSelector(returnData("weapon",attacker));
+  /*
   //Si l'humain joue
   if (attacker === 1) {
     //On affiche le prompt
     var input = display("prompt");
     //on le transforme en nombre
     var nInput = Number(input);
-    if(nInput < 1 || nInput > 4) {
+    if (nInput < 1 || nInput > 4) {
       return;
     }
-    
-  }
-  //Si c'est le joueur deux
-  if (attacker === 2) {
+
+  } else if (attacker === 2) {
     //Il choisi une attaque au hasard -- On mettra une fonction ia ici au besoin
     var nInput = Math.round((Math.random() * 3) + 1);
     //On transforme le number en string pour la fonction historyUpdate()
@@ -288,31 +378,55 @@ function turnManager() {
     //On affiche l'écran
     display("alert");
   }
+*/
+//Si le joueur actif ne passe pas son tour, il joue
+  if (returnData("jumpTurn",attacker) === false){
+    //on affiche display("prompt") si J1, on affiche display("Alert si c'est J2")
+    if (playerTurn === 1) {
+      //On affiche le prompt et on récupère la saisie
+      var input = display("prompt");
+      //Si la saisie est un nombre compris dans l'array de l'arme  
+      if (Number(input) > 0 &&  Number(input) <  atkWeapon.length){
+        //input = nom de l'action dans l'array de l'arme 
+        input = atkWeapon[Number(input)-1];
+        console.log("Input P1" +input);
+      } else {
+        return;
+      }
+    } else if (playerTurn === 2) {
+      display("alert");
+      //L'ia choisi une attaque au hasard -- On mettra une fonction ia ici au besoin
+      var input = Math.round((Math.random() * 3) + 1);
+     //input = nom de l'action dans l'array de l'arme 
+      input = atkWeapon[Number(input)-1];
+      console.log("Input P2" + input)
+    }
 
-  //Déroulé du combat
-  //Récupère la data renvoyée de playerAction
-  var dataCombat = playerAction(nInput);
-  //Mise a jour du dialogue actif
-  currentDialog = dialog(dataCombat[0], returnData("name", attacker), returnData("name", defender), dataCombat[1], returnData("activeDef",attacker));
+      //check de l'arret du combat
+    if (input === "e" || returnData("pv", 1) <= 0 || returnData("pv", 2) <= 0) {
+      //Pour arréter le combat et sortir de la boucle while
+      combatRunning = false;
+    return;
+    }
+    //sinon on continue le combat
+    var dataCombat = playerAction(input);
+    //Mise a jour du dialogue actif
+    currentDialog = dialog(dataCombat[0], returnData("name", attacker), returnData("name", defender), dataCombat[1], returnData("activeDef", attacker));
+  } else {
+// Si jumpturn = true le joueur ne joue pas On affiche directement un dialogue
+    currentDialog = dialog("jumpTurn", returnData("name", attacker), returnData("name", defender), dataCombat[1], returnData("activeDef", attacker));
+    display("alert");
+    pushData("jumpTurn",false,attacker);
+  }
+
+  
   //Mise à jour de l'historique
   compteurTour++;
   historyUpdate();
- 
 
-  //Changement de joueur actif
-  if (playerTurn === 1) {
-    playerTurn = 2
-  } else {
-    playerTurn = 1
-  };
-
-  //check de l'arret du combat
-  if (input === "e" || returnData("pv", 1) <= 0 || returnData("pv", 2) <= 0) {
-    //Pour arréter le combat et sortir de la boucle while
-    combatRunning = false;
-    return;
-  }
 }
+
+
 
 
 //------ BOUCLE PRINCIPALE ------
